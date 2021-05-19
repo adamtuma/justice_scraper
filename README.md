@@ -15,7 +15,7 @@ The program will then **output .docx** file in the directory in which the progra
 
 Examples of output documents for top 100 companies in the Czech Republic can be seen *'/examples/docs'*
 
-![process](https://github.com/adamtuma98/justice_scraper/blob/main/examples/process.png?raw=true)
+![process](https://github.com/adamtuma/justice_scraper/blob/main/examples/process.png)
 
 ## Additional features included in justice.ipynb
 The Jupyter Notebook has other useful functions which are not used within the main program.
@@ -41,7 +41,7 @@ getMap(df)
 ```
 The function will draw a map with markers for companies included in a dataframe.
 
-![map](https://github.com/adamtuma98/justice_scraper/blob/main/examples/map.png?raw=true)
+![map](https://github.com/adamtuma/justice_scraper/blob/main/examples/map.png)
 
 ## Contributing
 Please hit me up in case of encountering some bugs.
