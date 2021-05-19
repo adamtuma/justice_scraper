@@ -1,6 +1,6 @@
 # Justice Scraper
 
-This program scraper company information from the official register available at justice.cz
+This program scrapes company information from the official register available at justice.cz
 
 Created by Adam Tůma
 
@@ -39,7 +39,7 @@ Once provided with the output of getBasicInfo() the function will append latitud
 ```python
 getMap(df)
 ```
-The function will draw a map with markers for companies included in a dataframe.
+The function will draw a map with markers for companies included in a dataframe. See map.html in examples for better visualization.
 
 ![map](https://github.com/adamtuma/justice_scraper/blob/main/examples/map.png)
 
