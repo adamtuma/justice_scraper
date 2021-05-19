@@ -153,7 +153,11 @@ def get_vypis_doc(ico):
     p.add_run(keys[5]).bold=True
     p.add_run('\t'+data[keys[5]], style=document.styles['Light'])
     #get the rest of the information
-    for key in keys[6:-1]: #not interested in 'ostatní skutečnosti'
+    if 'Ostatní skutečnosti:' in keys:  #not interested in 'ostatní skutečnosti'
+        position = keys.index('Ostatní skutečnosti:')
+        keys = keys[:position]
+    else: pass
+    for key in keys[6:]: 
         p = document.add_paragraph(style=document.styles['Normal'])
         p.add_run(key.replace('+','')).bold=True
         values = data[key]
