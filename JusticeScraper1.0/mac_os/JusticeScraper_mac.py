@@ -86,8 +86,10 @@ def get_info(ico):
             except:
                 info.append(unicodedata.normalize("NFKD",text))
                 break
-            if span.find_previous('div') == span_next.find_previous('div'):
-                while span.find_previous('div') == span_next.find_previous('div'):
+            if span.parent == span_next.parent:
+                while span.parent == span_next.parent:
+                    if str(span.next.next) == '<br/>':   #checks if there are no line breaks inserted
+                        break
                     text = text + span_next.text
                     i += 1
                     span = spans[i]
@@ -155,10 +157,10 @@ def get_vypis_doc(ico):
     p.add_run(keys[5]).bold=True
     p.add_run('\t'+data[keys[5]], style=document.styles['Light'])
     #get the rest of the information
-    if 'Ostatní skutečnosti:' in keys:  #not interested in 'ostatní skutečnosti'
-        position = keys.index('Ostatní skutečnosti:')
-        keys = keys[:position]
-    else: pass
+    if var1.get() == 0:
+        if 'Ostatní skutečnosti:' in keys:  #not interested in 'ostatní skutečnosti'
+            position = keys.index('Ostatní skutečnosti:')
+            keys = keys[:position]
     for key in keys[6:]: 
         p = document.add_paragraph(style=document.styles['Normal'])
         p.add_run(key.replace('+','')).bold=True
@@ -168,7 +170,6 @@ def get_vypis_doc(ico):
 
     location = os.path.abspath(
         os.path.join(sys.executable + f'/výpis_{data[keys[0]]}_.docx', '..', '..', '..', '..','..', f'výpis_{data[keys[0]]}_.docx'))
-        
     #location = '/Users/adamtuma/Documents/mac_os/'+f'/výpis_{data[keys[0]]}_.docx'
     document.save(location)
 
@@ -182,7 +183,7 @@ label1.config(font=('Calibri', 14))
 canvas1.create_window(200, 25, window=label1)
 
 label2 = tk.Label(root, text='IČO společnosti:')
-label2.config(font=('Calibri Light', 10))
+label2.config(font=('Calibri', 10))
 canvas1.create_window(200, 120, window=label2)
 
 label3 = tk.Label(root, text=('Adam Tůma 2021'+'\u00A9'))
@@ -191,6 +192,11 @@ canvas1.create_window(55, 290, window=label3)
 
 entry1 = tk.Entry (root) 
 canvas1.create_window(200, 140, window=entry1)
+
+var1 = tk.IntVar()
+var1.set(1)
+checker1 = tk.Checkbutton(root, text='Ostatní skutečnosti',variable=var1, onvalue=1, offvalue=0)
+canvas1.create_window(200, 165, window=checker1)
 
 label4 = tk.Label(root)
 canvas1.create_window(200, 230, window=label4)
@@ -205,7 +211,7 @@ def get_vypis():
         label4.config(text='Něco se pokazilo, zkontroluj IČO.')
 
 button1 = tk.Button(text='Připravit výpis', command=get_vypis)
-button1.config(font=('Calibri Light', 10))
-canvas1.create_window(200, 180, window=button1)
+button1.config(font=('Calibri', 10))
+canvas1.create_window(200, 195, window=button1)
 
 root.mainloop()
