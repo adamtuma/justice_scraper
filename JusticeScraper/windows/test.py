@@ -1,31 +1,30 @@
-# JUSTICE SCRAPER 1.0 WINDOWS
 import requests
 import docx
 import unicodedata
 import tkinter as tk
+import urllib.request
 from bs4 import BeautifulSoup
 from docx import Document
 from docx.shared import Inches
 from docx.shared import Pt
 from docx.enum.style import WD_STYLE_TYPE
 
-def get_url(ico):
+def get_subjektID(ico):
     url_0 = f"https://or.justice.cz/ias/ui/rejstrik-$firma?ico={ico}&jenPlatne=PLATNE&polozek=1&typHledani=STARTS_WITH"
     html_subjektID = requests.get(url_0).content
     soupID = BeautifulSoup(html_subjektID, 'lxml', from_encoding="utf-8")
     vypis = str(soupID.find(href=True, text='Výpis platných'))
     subjektID = vypis.split('subjektId=')[1].split('&')[0]
-    url = f'https://or.justice.cz/ias/ui/rejstrik-firma.vysledky?subjektId={subjektID}&typ=PLATNY'
-    return url
+    return subjektID
 
-def get_soup(ico):
-    url = get_url(ico)
+def get_soup(subjektID):
+    url = f'https://or.justice.cz/ias/ui/rejstrik-firma.vysledky?subjektId={subjektID}&typ=PLATNY'
     html = requests.get(url).content
     soup = BeautifulSoup(html, 'lxml', from_encoding="utf-8")
     return soup
 
-def get_info(ico):
-    soup = get_soup(ico)
+def get_info(subjektID):
+    soup = get_soup(subjektID)
     data = {}
     # first getting the basic information which will be formatted differently
     nazev = soup.find(class_="nounderline").findNext(class_="nounderline").findNext('span').text    #here we take different approach as the object is sometimes Obchodní firma and sometimes different
@@ -107,8 +106,8 @@ def get_info(ico):
         keys.append(key)
     return data
 
-def get_vypis_doc(ico):
-    data = get_info(ico)
+def get_vypis_doc(subjektID):
+    data = get_info(subjektID)
     keys = list(data.keys())
 
     #define document and styles settings
@@ -155,10 +154,6 @@ def get_vypis_doc(ico):
     p.add_run(keys[5]).bold=True
     p.add_run('\t'+data[keys[5]], style=document.styles['Light'])
     #get the rest of the information
-    if var1.get() == 0:
-        if 'Ostatní skutečnosti:' in keys:  #not interested in 'ostatní skutečnosti'
-            position = keys.index('Ostatní skutečnosti:')
-            keys = keys[:position]
     for key in keys[6:]: 
         p = document.add_paragraph(style=document.styles['Normal'])
         p.add_run(key.replace('+','')).bold=True
@@ -167,47 +162,21 @@ def get_vypis_doc(ico):
             p.add_run('\n'+value, style=document.styles['Light'])
 
     document.save(f'výpis_{data[keys[0]]}_.docx')
+    return data[keys[0]]
 
-root= tk.Tk()
+def get_pdf_file(subjektID, nazev):
+    pdf_url = f'https://or.justice.cz/ias/ui/print-pdf?subjektId={subjektID}&typVypisu=PLATNY&full=false'
+    pdf_filename = f'pdf_výpis_{nazev}_.pdf'
+    urllib.request.urlretrieve(pdf_url, pdf_filename)
 
-canvas1 = tk.Canvas(root, width = 400, height = 300)
-canvas1.pack()
-
-label1 = tk.Label(root, text='Justice Scraper 1.0')
-label1.config(font=('Calibri', 14))
-canvas1.create_window(200, 25, window=label1)
-
-label2 = tk.Label(root, text='IČO společnosti:')
-label2.config(font=('Calibri', 10))
-canvas1.create_window(200, 120, window=label2)
-
-label3 = tk.Label(root, text=('Adam Tůma 2021'+'\u00A9'))
-label3.config(font=('Calibri', 9))
-canvas1.create_window(55, 290, window=label3)
-
-entry1 = tk.Entry (root) 
-canvas1.create_window(200, 140, window=entry1)
-
-var1 = tk.IntVar()
-var1.set(1)
-checker1 = tk.Checkbutton(root, text='Ostatní skutečnosti',variable=var1, onvalue=1, offvalue=0)
-canvas1.create_window(200, 165, window=checker1)
-
-
-label4 = tk.Label(root)
-canvas1.create_window(200, 230, window=label4)
-
-def get_vypis():
-    ico = str(entry1.get())
-    label4.config(text='')
+def get_vypis(ico):
+    subjektID = get_subjektID(ico)
     try:
-        get_vypis_doc(ico)
-        label4.config(text='Hotovo!')
+        nazev = get_vypis_doc(subjektID)
+        get_pdf_file(subjektID, nazev)
+        print('done')
     except: 
-        label4.config(text='Něco se pokazilo, zkontroluj IČO.')
+        print('error')
 
-button1 = tk.Button(text='Připravit výpis', command=get_vypis)
-button1.config(font=('Calibri', 10))
-canvas1.create_window(200, 195, window=button1)
-
-root.mainloop()
+ico = 27201121
+get_vypis(ico)
